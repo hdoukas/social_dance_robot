@@ -1,0 +1,236 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Social Dance Robot - WSO2 Eu Con 2015</title>
+
+    <style type="text/css">
+        body {
+            font-family:sans-serif
+        }
+        .main {
+            border:1px solid #000;
+            box-shadow:10px 10px 5px #888;
+            border-radius:12px;
+            padding:20px;
+            background-color:#fff;
+            margin:155px;
+            width:700px;
+            margin-left:auto;
+            margin-right:auto
+        }
+        .logo {
+            width:680px;
+            margin-left:auto;
+            margin-right:auto;
+            display:block;
+            padding:15px
+        }
+        .container {
+            -webkit-perspective:300;
+            perspective:300
+        }
+    </style>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.1/jquery.min.js"></script>
+    
+
+    <script type="text/javascript">
+        var tmp_tiltLR = 0;
+        var tmp_tiltFB = 0;
+        var tmp_dir = 0;
+
+        var temp_time;
+
+        var tiltLR;
+        var tiltFB;
+        var direction;
+
+        var accelerometerX, accelerometerY, accelerometerZ;
+
+
+        function init() {
+            
+        	temp_time = new Date().getTime();
+        	console.log(temp_time);
+            if (window.DeviceOrientationEvent) {
+                console.log("DeviceOrientation is supported");
+                //document.getElementById("doEvent").innerHTML = "DeviceOrientation";
+                // Listen for the deviceorientation event and handle the raw data
+                window.addEventListener('deviceorientation', function (eventData) {
+                    // gamma is the left-to-right tilt in degrees, where right is positive
+                    var tiltLR = eventData.gamma;
+
+                    // beta is the front-to-back tilt in degrees, where front is positive
+                    var tiltFB = eventData.beta;
+
+                    // alpha is the compass direction the device is facing in degrees
+                    var dir = eventData.alpha
+
+                    if (tmp_tiltLR != tiltLR) {
+                        tmp_tiltLR = tiltLR;
+                    }
+                    if (tmp_tiltFB != tiltFB) {
+                        if(Math.abs(tmp_tiltFB - tiltFB) > 5)
+                            checktime();
+                        tmp_tiltFB = tiltFB;
+
+                    }
+                    if (tmp_dir != dir) {
+                        tmp_dir = dir;
+                    }
+
+
+                    //document.getElementById("doTiltLR").innerHTML = Math.round(tiltLR);
+                    //document.getElementById("doTiltFB").innerHTML = Math.round(tiltFB);
+                    //document.getElementById("doDirection").innerHTML = Math.round(dir);
+
+                    //document.tiltLR = Math.round(tiltLR);
+                    //document.tiltFB = Math.round(tiltFB);
+                    //document.direction = Math.round(dir);
+
+
+                    
+
+                    // Apply the transform to the image
+                    var logo = document.getElementById("imgLogo");
+                    logo.style.webkitTransform = "rotate(" + tiltLR + "deg) rotate3d(1,0,0, " + (tiltFB * -1) + "deg)";
+                    logo.style.MozTransform = "rotate(" + tiltLR + "deg)";
+                    logo.style.transform = "rotate(" + tiltLR + "deg) rotate3d(1,0,0, " + (tiltFB * -1) + "deg)";
+
+                    
+
+                }, false);
+
+				
+            } else {
+                //document.getElementById("doEvent").innerHTML = "Not supported."
+                console.log("DeviceOrientation Not supported");
+            }
+
+            if (window.DeviceMotionEvent) {
+					window.addEventListener('devicemotion', deviceMotionHandler, false);
+			} 
+			else {
+  					document.getElementById("dmEvent").innerHTML = "Not supported."
+			}
+
+        }
+
+        function deviceMotionHandler(eventData) {
+		  var info, xyz = "[X, Y, Z]";
+
+		  // Grab the acceleration from the results
+		  var acceleration = eventData.acceleration;
+		  info = xyz.replace("X", Math.round(acceleration.x));
+		  info = info.replace("Y", Math.round(acceleration.y));
+		  info = info.replace("Z", Math.round(acceleration.z));
+		  //document.getElementById("moAccel").innerHTML = info;
+
+		  document.accelerometerX = Math.round(acceleration.x);
+		  document.accelerometerY = Math.round(acceleration.y);
+		  document.accelerometerZ = Math.round(acceleration.z);
+
+
+		  // Grab the acceleration including gravity from the results
+		  acceleration = eventData.accelerationIncludingGravity;
+		  info = xyz.replace("X", Math.round(acceleration.x));
+		  info = info.replace("Y", Math.round(acceleration.y));
+		  info = info.replace("Z", Math.round(acceleration.z));
+		  //document.getElementById("moAccelGrav").innerHTML = info;
+
+
+		  
+
+		  // Grab the rotation rate from the results
+		  var rotation = eventData.rotationRate;
+		  info = xyz.replace("X", Math.round(rotation.alpha));
+		  info = info.replace("Y", Math.round(rotation.beta));
+		  info = info.replace("Z", Math.round(rotation.gamma));
+		  //document.getElementById("moRotation").innerHTML = info;
+
+		  // // Grab the refresh interval from the results
+		  info = eventData.interval;
+		  //document.getElementById("moInterval").innerHTML = info;      
+
+		}
+
+		
+
+		function checktime(){
+            //send dance commands every 1 second
+			var time = new Date().getTime();
+			if((time - temp_time) > 1000) {
+				temp_time = new Date().getTime();
+				
+				$.post("dance.php",
+						function(result){
+    						console.log(result);
+  						}
+					);
+			}
+
+		}
+		
+    </script>
+</head>
+
+
+<body onload="init()">
+
+    <div class="main">
+    	<div align="middle">
+        <h2>Social Dance Robot</h2>
+        <p>(Please tilt or move/shake your smartphone!)</p>
+    </div>
+
+        <br />
+        <div class="container" style="perspective: 300;">
+        	<img src="logo.png" id="imgLogo" class="logo">
+    	</div>
+    	<br />
+    	<br />
+        <!--<table>
+            <tr>
+                <td>Tilt Left/Right [gamma]</td>
+                <td id="doTiltLR"></td>
+            </tr>
+            <tr>
+                <td>Tilt Front/Back [beta]</td>
+                <td id="doTiltFB"></td>
+            </tr>
+            <tr>
+                <td>Direction [alpha]</td>
+                <td id="doDirection"></td>
+            </tr>
+            <tr>
+      <td>Event Supported</td>
+      <td id="dmEvent"></td>
+    </tr>
+    <tr>
+      <td>acceleration</td>
+      <td id="moAccel"></td>
+    </tr>
+    <tr>
+      <td>accelerationIncludingGravity</td>
+      <td id="moAccelGrav"></td>
+    </tr>
+    <tr>
+      <td>rotationRate</td>
+      <td id="moRotation"></td>
+    </tr>
+    <tr>
+      <td>interval</td>
+      <td id="moInterval"></td>
+    </tr>
+        </table>
+    -->
+    </div>
+
+    
+
+
+</body>
+
+</html>
