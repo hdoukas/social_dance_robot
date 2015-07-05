@@ -8,7 +8,7 @@ When more than 2 users send a dancing command, then the robot changes its dancin
 
 See the video here:
 
-[![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/_5-DTexgfaM/0.jpg)](http://www.youtube.com/watch?v=YOUTUBE_VIDEO_ID_HERE)
+[![social dancing robot](http://img.youtube.com/vi/_5-DTexgfaM/0.jpg)](http://www.youtube.com/watch?v=_5-DTexgfaM)
 
 License
 ----
